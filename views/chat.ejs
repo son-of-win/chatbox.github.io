@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat application</title>
+    <!-- latest compiled and minified CSS --->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <!--jQuery librariy-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!--latest compiled Javascript-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <style type="text/css">
+      *{ margin: 0; padding: 0; box-sizing: border-box;}
+      body{ font: : 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px;position: fixed;bottom: 0;width: 90%; }
+      form input {border: 0; padding: 10px;width: 90%; margin-right: .5%;}
+      #conversation{ list-style-type: none; margin: 0;padding: 0;}
+      #conversation li {padding: 5px 10px;}
+      #conversation li:nth-child(odd) {background: #eee;}
+    </style>
+</head>
+<body>
+  
+    <div class="container">
+        <ul id="conversation">
+        </ul>
+
+        <form>
+            <input type="text" name="message" id="message"/>
+            <button class="btn btn-success" id="btn_send">Send</button>
+        </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <script type="text/javascript">
+      var socket = io.connect('http://localhost:3000');
+   /* socket.on('connect', (data) => {
+      console.log(data);
+      //socket.emit('my other event', { my: 'data' });*/
+      socket.on("connect",function(){
+        console.log("User is connecting to server");
+
+        //ask name
+        var  username = prompt("what is your name?");
+
+        socket.emit("adduser",username); //gửi lên server một sự kiện có tên là adduser , với data kèm theo là username
+
+
+    });
+
+      //listen update_message event from server
+      socket.on("update_message",function(data){ 
+        $("#conversation").append("<li> <b>" + data.sender + ": </b>" + data.message + "</li>");
+    });
+
+      //send message event
+      $("#btn_send").click(function(e){
+            //get message
+            var message = $("#message").val();
+            //reset input về rỗng
+            $("#message").val("");
+
+          if(message.trim().length != 0){
+            socket.emit("send_message",message);
+          }
+      });
+
+        $("form").submit(function(){
+          return false;
+        });
+ 
+    </script>
+</body>
+</html>
